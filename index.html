@@ -149,7 +149,7 @@ function Degree(courses){
                   op.selected = 'selected';
                   sel.options.add(op); 
             });
-            sel.onclick = function(e){
+            sel.onchange = function(e){
               v.set_grade(sel.value);
               td_4.innerHTML = v.grade_point.toFixed(2);
             };
@@ -157,7 +157,7 @@ function Degree(courses){
 
             var checkbox = document.createElement('input');
             checkbox.type = "checkbox";
-            checkbox.onclick = function(e){          
+            checkbox.onchange = function(e){          
               v.set_repeat(checkbox.checked);
               td_4.innerHTML = v.grade_point.toFixed(2);
             };
