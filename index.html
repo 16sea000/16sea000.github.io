@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>GPA Calculator</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <style>
+  .affix {
+      top: 20px;
+      z-index: 9999 !important;
+  }
+  </style>
+
+
+  </head>
+  <body>
+
+
+<div class="container-fluid" style="background-color:#2196F3;color:#fff;height:200px;">
+  <h1>EAT - GPA Claculator</h1>
+</div>
+<br>
+
+<div class="container">
+  <div class="row">
+    <nav class="col-sm-3">
+      <div class="well" data-spy="affix" data-offset-top="205">
+            <table class="table table-lg">
+            <tbody>
+              <tr><td>Level 1 :</td><td id="gpa_y1">0.00</td></tr>
+              <tr><td>Level 2 :</td><td  id="gpa_y2">0.00</td></tr>
+              <tr><td>Level 3 :</td><td  id="gpa_y3">0.00</td></tr>
+              <tr><td>Overall :</td><td  id="gpa">0.00</td></tr>
+            </tbody>
+          </table>
+      </div>
+    </nav>
+    <div class="col-sm-9">   
+        <table class="table table-condensed" id="tbl">
+          <thead>
+            <tr>
+              <th>Course</th>
+              <th>Grade</th>
+              <th>Repeat</th>
+              <th>Grade Point</th>
+            </tr>
+          </thead>
+        </table>
+    </div>
+  </div>
+</div>    
+
+
+<script>
+
+var grades = {
+  'A+': 4.0,
+  'A':  4.0,
+  'A-': 3.67,
+  'B+': 3.33,
+  'B':  3.00,
+  'B-': 2.67,
+  'C+': 2.33,
+  'C':  2.00,
+  'C-': 1.67,
+  'D+': 1.33,
+  'D':  1.0,
+  'F': 0.0,
+  'I': 0.0,
+};
+
+function Course(code, title, credits, semester) {
+    this.code = code;
+    this.title = title;
+    this.credits = credits;
+    this.semester = semester;
+    this.year = Math.ceil(semester/2);
+    this.grade_point = 0.00;
+    this.grade = 'I';
+    this.repeat = false;
+    this.set_grade = function(grade){
+        this.grade = grade;
+        this.grade_point = (this.repeat && grades[this.grade] > 2.00)  ? 2.00 : grades[this.grade];
+        console.log("Set grade" + this.grade_point);
+        refresh();
+        //super.calc_gpa();
+    }
+    this.set_repeat = function(repeat){
+        this.repeat = repeat;
+        this.grade_point = (repeat && grades[this.grade] > 2.00)  ? 2.00 : grades[this.grade];
+        refresh();
+    }
+}
+
+function Degree(courses){
+    this.courses = courses;
+    this.gpa = 0.00;
+    this.gpa_y1 = 0.00;
+    this.gpa_y2 = 0.00;
+    this.gpa_y3 = 0.00;
+    this.calc_gpa = function(){
+      var WiGi,Wi,WiGi_y1,Wi_y1,WiGi_y2,Wi_y2,WiGi_y3,Wi_y3;
+     
+      WiGi = Wi = WiGi_y1 = Wi_y1 = WiGi_y2 = Wi_y2 = WiGi_y3 = Wi_y3 = 0.00;
+       WiGi_y2 = 0.00;
+      Wi_y2 = 0.00;
+      courses.forEach(function(v,k){
+        WiGi += v.grade_point * v.credits;
+        Wi += v.credits;
+        if(v.year == 1){
+          WiGi_y1 += v.grade_point * v.credits;
+          Wi_y1 += v.credits;
+        }else if(v.year == 2){
+          WiGi_y2 += v.grade_point * v.credits;
+          Wi_y2 += v.credits;
+        }else if(v.year == 3){
+          WiGi_y3 += v.grade_point * v.credits;
+          Wi_y3 += v.credits;
+        }
+      });
+      this.gpa = Wi != 0 ? (WiGi/Wi).toFixed(2) : 0.00;
+      this.gpa_y1 = Wi_y1 != 0 ? (WiGi_y1/Wi_y1).toFixed(2) : 0.00;
+      this.gpa_y2 = Wi_y2 != 0 ? (WiGi_y2/Wi_y2).toFixed(2) : 0.00;
+      this.gpa_y3 = Wi_y3 != 0 ? (WiGi_y3/Wi_y3).toFixed(2) : 0.00;
+    }
+    this.draw_table = function(){
+      var tbody = document.createElement("tbody");
+
+      this.courses.forEach(function(v,k){
+            var tr = document.createElement("tr");
+            var td_1 = document.createElement("td");
+            var td_2 = document.createElement("td");
+            var td_3 = document.createElement("td");
+            var td_4 = document.createElement("td");
+
+            var title = document.createTextNode('EA '+ v.code + ' - ' + v.title);
+            td_1.appendChild(title);
+            var grade_point = document.createTextNode(v.grade_point.toFixed(2));
+            td_4.appendChild(grade_point);
+
+            var sel = document.createElement("select");
+            forEach(grades, function (v, i) {
+                  var op = new Option();
+                  op.text = op.value = i;
+                  op.selected = 'selected';
+                  sel.options.add(op); 
+            });
+            sel.onclick = function(e){
+              v.set_grade(sel.value);
+              td_4.innerHTML = v.grade_point.toFixed(2);
+            };
+            td_2.appendChild(sel);
+
+            var checkbox = document.createElement('input');
+            checkbox.type = "checkbox";
+            checkbox.onclick = function(e){          
+              v.set_repeat(checkbox.checked);
+              td_4.innerHTML = v.grade_point.toFixed(2);
+            };
+
+            td_3.appendChild(checkbox);
+
+            tr.appendChild(td_1);
+            tr.appendChild(td_2);
+            tr.appendChild(td_3);
+            tr.appendChild(td_4);
+
+            tbody.appendChild(tr);
+      });
+
+      document.getElementById("tbl").appendChild(tbody);
+
+      
+    }
+}
+
+var courses = [
+  new Course(1001, 'Waves and Vibrations & AC Theory', 2, 1),
+  new Course(1002, 'Analogue & Digital Electronics', 2, 1),
+  new Course(1003, 'Electromagnetic Theory', 2, 1),
+  new Course(1004, 'Introduction to Computer Programming', 2, 1),
+  new Course(1005, 'Computer Applications', 2, 1),
+  new Course(1006, 'Computer Architecture- I', 2, 1),
+  new Course(1007, 'Electronic Circuit Simulations', 2, 1),
+  new Course(1008, 'Object Oriented Programming', 2, 1),
+  new Course(1009, 'Calculus', 2, 1),
+  new Course(1010, 'Mathematical Methods – I', 2, 1),
+  new Course(1011, 'Differential Equations', 2, 1),
+  new Course(1012, 'Probability and Statistics', 2, 1),
+  new Course(1013, 'English for Science and Technology', 2, 1),
+  new Course(1030, 'Analogue Electronics Laboratory', 2, 1),
+  new Course(1031, 'Digital Electronics Laboratory', 2, 1),
+  new Course(2001, 'Analogue & Digital Electronics – II', 2, 3),
+  new Course(2002, 'Analogue & Digital ICs and Their Applications', 2, 3),
+  new Course(2003, 'Sensors & Transducers and Data Acquisition Systems', 2, 3),
+  new Course(2004, 'Computer Architecture – II', 2, 3),
+  new Course(2005, 'Applied Numerical Methods', 2, 3),
+  new Course(2006, 'Internet Programming', 2, 3),
+  new Course(2007, 'Data Communication Techniques', 2, 3),
+  new Course(2008, 'Rapid Applications Development', 2, 3),
+  new Course(2009, 'Computational Statistics', 2, 3),
+  new Course(2010, 'Mathematical Methods – II', 2, 3),
+  new Course(2011, 'Technical Writing for Academic Purposes', 2, 3),
+  new Course(2012, 'Advanced Communicative Skills', 2, 3),
+  new Course(2013, 'Industrial Management', 2, 3),
+  new Course(2030, 'Instrumentation Laboratory', 2, 3),
+  new Course(2031, 'Data Acquisition Laboratory', 2, 3),
+  new Course(3001, 'Semiconductor Devices and Optoelectronics', 2, 5),
+  new Course(3002, 'Digital Signal Processing', 2, 5),
+  new Course(3003, 'Digital Image Processing', 2, 5),
+  new Course(3004, 'Artificial Neural Networks', 2, 5),
+  new Course(3005, 'Mobile Application Development', 2, 5),
+  new Course(3006, 'Embedded Linux Development', 2, 5),
+  new Course(3007, 'Computer Networking', 2, 5),
+  new Course(3021, 'Robotics', 2, 5),
+  new Course(3022, 'Programmable Logic Controllers', 2, 5),
+  new Course(3023, 'Medical Instrumentation', 2, 5),
+  new Course(3030, 'Microcontroller Laboratory', 2, 5),
+  new Course(3040, 'Research Methodologies', 2, 5),
+  new Course(3041, 'Independent Study', 2, 5),
+  new Course(3050, 'Project', 4, 5)
+];
+
+var d = new Degree(courses);
+d.draw_table();
+
+function refresh(){
+    d.calc_gpa();
+    document.getElementById("gpa").innerHTML = d.gpa;
+    document.getElementById("gpa_y1").innerHTML = d.gpa_y1;
+    document.getElementById("gpa_y2").innerHTML = d.gpa_y2;
+    document.getElementById("gpa_y3").innerHTML = d.gpa_y3;
+}
+
+
+function forEach(collection, callBack) {
+        var i = 0, // Array and string iteration
+            iMax = 0, // Collection length storage for loop initialisation
+            key = '', // Object iteration
+            collectionType = '';
+ 
+        // Verify that callBack is a function
+        if (typeof callBack !== "function") {
+            throw new TypeError("forEach: callBack should be function, " +
+              typeof callBack + " given.");
+        }
+ 
+        // Find out whether collection is array, string or object
+        switch (Object.prototype.toString.call(collection)) {
+          case "[object Array]":
+              collectionType = "array";
+              break;
+ 
+          case "[object Object]":
+              collectionType = "object";
+              break;
+ 
+          case "[object String]":
+              collectionType = "string";
+              break;
+ 
+          default:
+              collectionType = Object.prototype.toString.call(collection);
+              throw new TypeError(
+                "forEach: collection should be array, object or string, " +
+                collectionType + " given.");
+        }
+ 
+        switch (collectionType) {
+          case "array":
+              for (i = 0, iMax = collection.length; i < iMax; i += 1) {
+                  callBack(collection[i], i);
+              }
+ 
+              break;
+ 
+          case "string":
+              for (i = 0, iMax = collection.length; i < iMax; i += 1) {
+                  callBack(collection.charAt(i), i);
+              }
+ 
+              break;
+ 
+          case "object":
+              for (key in collection) {
+                  // Omit prototype chain properties and methods
+                  if (collection.hasOwnProperty(key)) {
+                      callBack(collection[key], key);
+                  }
+              }
+ 
+              break;
+ 
+          default:
+              throw new Error(
+              "Continuity error in forEach, this should not be possible.");
+              break;
+        }
+ 
+        return null;
+    }
+ 
+
+</script>  
+
+
+
+
+  </body>
+</html>
