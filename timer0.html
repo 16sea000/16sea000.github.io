@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Timer0 Helper</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <style>
+  </style>
+  </head>
+  <body>
+      <!--
+<div class="container-fluid" style="background-color:#2196F3;color:#fff;height:200px;">
+  <h1>Timer0 Helper</h1>
+</div>
+<br>
+-->
+
+<div class="container">
+    <table class="table">
+        <tr>
+                <td>mcu_frequency</td>
+                <td>= <input  type="number" id="mcu_frequency" onkeyup="calc()"></input> Hz</td>
+        </tr>
+        <tr>
+                <td>pre_scaler</td>
+                <td>= <input  type="number" id="pre_scaler" onkeyup="calc()"></input></td>
+        </tr>
+        <tr>
+                <td>requred_delay</td>
+                <td>= <input type="number" id="requred_delay" onkeyup="calc()"></input> seconds</td>
+        </tr>
+        <tr>
+            <td>pre_scaled_frequency = mcu_frequency/pre_scaler</td>
+            <td>= <span id="pre_scaled_frequency"></span></td>
+        </tr>
+        <tr>
+            <td>pre_scaled_clock_cycle = 1/pre_scaled_frequency</td>
+            <td>= <span id="pre_scaled_clock_cycle"></span></td>
+        </tr>
+        <tr>
+            <td>time_per_interrupt = pre_scaled_clock_cycle * 256</td>
+            <td>= <span id="time_per_interrupt"></span> seconds</td>
+        </tr>
+        <tr>
+            <td>interrupt_count = (requred_delay/time_per_interrupt)</td>
+            <td>= <span id="interrupt_count"></span></td>
+        </tr>
+        <tr>
+            <td>time_to_cover = requred_delay - (interrupt_count * time_per_interrupt)</td>
+            <td>= <span id="time_to_cover"></span> seconds</td>
+        </tr>
+        <tr>
+            <td>pre_scaled_count = time_to_cover / pre_scaled_clock_cycle</td>
+            <td>= <span id="pre_scaled_count"></span></td>
+        </tr>
+    </table>
+</div>    
+
+
+<script>
+
+    var mcu_frequency=8000000;
+    var requred_delay = 10;
+    var pre_scaler = 1024;
+    $("#mcu_frequency").val(mcu_frequency);
+    $("#requred_delay").val(requred_delay);
+    $("#pre_scaler").val(pre_scaler);
+
+
+    //clock_cycle = 1/f;
+
+    var calc = function(){
+
+        mcu_frequency = $("#mcu_frequency").val();
+        requred_delay = $("#requred_delay").val();
+        pre_scaler = $("#pre_scaler").val();
+
+        let pre_scaled_frequency = mcu_frequency/pre_scaler;
+        let pre_scaled_clock_cycle = 1/pre_scaled_frequency;
+        let time_per_interrupt = pre_scaled_clock_cycle * 256;
+        let interrupt_count = (Math.floor(requred_delay/time_per_interrupt)); // 30
+        let time_to_cover = requred_delay - (interrupt_count * time_per_interrupt);
+        let pre_scaled_count = Math.floor(time_to_cover / pre_scaled_clock_cycle); // 133
+        //console.log(interrupt_count, pre_scaled_count);
+
+        $("#pre_scaled_frequency").html(pre_scaled_frequency);
+        $("#pre_scaled_clock_cycle").html(pre_scaled_clock_cycle);
+        $("#time_per_interrupt").html(time_per_interrupt);
+        $("#interrupt_count").html(interrupt_count);
+        $("#time_to_cover").html(time_to_cover);
+        $("#pre_scaled_count").html(pre_scaled_count);        
+    }
+    calc();
+</script>  
+
+
+
+
+  </body>
+</html>
